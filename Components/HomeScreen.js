@@ -7,19 +7,19 @@ const mockBooks = [
     id: '1',
     title: 'Livre 1',
     author: 'Auteur 1',
-    coverImage: 'https://fakeimg.pl./100',
+    coverImage: 'https://via.placeholder.com/100',
   },
   {
     id: '2',
     title: 'Livre 2',
     author: 'Auteur 2',
-    coverImage: 'https://fakeimg.pl./100',
+    coverImage: 'https://via.placeholder.com/100',
   },
   {
     id: '3',
     title: 'Livre 3',
     author: 'Auteur 3',
-    coverImage: 'https://fakeimg.pl./100',
+    coverImage: 'https://via.placeholder.com/100',
   },
 ];
 
