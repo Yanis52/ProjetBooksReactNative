@@ -8,3 +8,7 @@ npm install @react-native-async-storage/async-storage
 ---
 Run with : 
 npm run android
+---
+Run Api:
+cd api-flask
+py ./main.py
