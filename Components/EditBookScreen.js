@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import axios from 'axios';
 
 export default function EditBookScreen({ navigation, route }) {
   const { book, updateBook } = route.params;
@@ -9,7 +10,7 @@ export default function EditBookScreen({ navigation, route }) {
   const [description, setDescription] = useState(book.description);
   const [coverImage, setCoverImage] = useState(book.coverImage);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updatedBook = {
       ...book,
       title,
@@ -18,8 +19,14 @@ export default function EditBookScreen({ navigation, route }) {
       description,
       coverImage,
     };
-    updateBook(updatedBook);
-    navigation.navigate("Home");
+
+    try {
+      const response = await axios.put(`http://192.168.1.189:5000/books/${book.id}`, updatedBook);
+      updateBook(response.data); // Mettre à jour l'état avec le livre modifié
+      navigation.navigate("Home");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du livre:", error);
+    }
   };
 
   return (

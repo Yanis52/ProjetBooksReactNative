@@ -1,38 +1,23 @@
-import React, { useState } from "react";
-import {
-  Button,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-
-// moks a changer par data persistante
-const mockBooks = [
-  {
-    id: "1",
-    title: "Livre 1",
-    author: "Auteur 1",
-    coverImage: "https://via.placeholder.com/100",
-  },
-  {
-    id: "2",
-    title: "Livre 2",
-    author: "Auteur 2",
-    coverImage: "https://via.placeholder.com/100",
-  },
-  {
-    id: "3",
-    title: "Livre 3",
-    author: "Auteur 3",
-    coverImage: "https://via.placeholder.com/100",
-  },
-];
+import React, { useState, useEffect } from "react";
+import { Button, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import axios from 'axios';
 
 export default function HomeScreen({ navigation }) {
-  const [books, setBooks] = useState(mockBooks);
+  const [books, setBooks] = useState([]);
+
+  // Fonction pour charger les livres depuis l'API
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get('http://192.168.1.189:5000/books');
+      setBooks(response.data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des livres:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
 
   const handleAddBook = () => {
     navigation.navigate("AddBook", {
@@ -47,8 +32,14 @@ export default function HomeScreen({ navigation }) {
         setBooks(books.map((b) => (b.id === updatedBook.id ? updatedBook : b))),
     });
   };
-  const handleDeleteBook = (bookId) => {
-    setBooks(books.filter((book) => book.id !== bookId));
+
+  const handleDeleteBook = async (bookId) => {
+    try {
+      await axios.delete(`http://192.168.1.189:5000/books/${bookId}`);
+      setBooks(books.filter((book) => book.id !== bookId));
+    } catch (error) {
+      console.error("Erreur lors de la suppression du livre:", error);
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -77,7 +68,7 @@ export default function HomeScreen({ navigation }) {
       <FlatList
         data={books}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
       />
       <Button title="Ajouter un Livre" onPress={handleAddBook} />
       <Text style={styles.footerText}>Développé par Yanis Habarek</Text>

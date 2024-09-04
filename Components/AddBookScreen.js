@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import axios from 'axios';
 
 export default function AddBookScreen({ navigation, route }) {
   const [title, setTitle] = useState("");
@@ -8,9 +9,8 @@ export default function AddBookScreen({ navigation, route }) {
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const newBook = {
-      id: Math.random().toString(),
       title,
       author,
       year,
@@ -18,11 +18,13 @@ export default function AddBookScreen({ navigation, route }) {
       coverImage,
     };
 
-    // Ajouter le livre dans la liste des livres (ici en utilisant le paramètre de navigation pour passer l'info à HomeScreen)
-    route.params.addBook(newBook);
-
-    // Revenir à l'écran d'accueil
-    navigation.navigate("Home");
+    try {
+      const response = await axios.post('http://192.168.1.189:5000/books', newBook);
+      route.params.addBook(response.data); // Mettre à jour l'état avec le nouveau livre ajouté
+      navigation.navigate("Home");
+    } catch (error) {
+      console.error("Erreur lors de l'ajout du livre:", error);
+    }
   };
 
   return (

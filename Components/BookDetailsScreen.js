@@ -1,19 +1,28 @@
 import React from 'react';
-import { View, Text, Image, Button, StyleSheet } from 'react-native';
+import { View, Text, Image, Button, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
 
 export default function BookDetailsScreen({ route, navigation }) {
-  const { book } = route.params;
+  const { book, updateBookList } = route.params;
 
   const handleEditBook = () => {
-    // KENUHN:Ajoute(encore) la navigation vers l'écran de modification de livre ici
-    // navigation.navigate('EditBook', { book });  //  décommente plus tard
+    navigation.navigate('EditBook', { book });
   };
 
-  const handleDeleteBook = () => {
-    // suppression du livre a add ici plus tard
-    
-    // Après suppression, retourner à l'écran d'accueil
-    // navigation.navigate('Home');  // KENUHN DECOMMENTE CETTE LIGNE PLUS TARD DUCOUP
+  const handleDeleteBook = async () => {
+    try {
+      // Envoi de la requête DELETE à l'API Flask
+      await axios.delete(`http://192.168.1.189:5000/books/${book.id}`);
+      
+      // Mise à jour de la liste des livres
+      updateBookList(book.id);
+
+      // Retour à l'écran d'accueil après suppression
+      navigation.navigate('Home');
+    } catch (error) {
+      Alert.alert("Erreur", "La suppression du livre a échoué.");
+      console.error("Erreur lors de la suppression du livre:", error);
+    }
   };
 
   return (
