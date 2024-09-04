@@ -10,5 +10,5 @@ Run with :
 npm run android
 ---
 Run Api:
-cd api-flask
+cd api-flask &&
 py ./main.py
