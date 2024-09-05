@@ -14,12 +14,12 @@ export default function AddProductScreen({ navigation, route }) {
       description,
       image_url,
       name,
-      price,
+      price: price.replace(',','.'),
       quantity,
     };
 
     try {
-      const response = await axios.post('http://192.168.1.189:5000/products', newProduct);
+      const response = await axios.post('http://192.168.1.51:5000/products', newProduct);
       route.params.addProduct(response.data); // Mettre à jour l'état avec le nouveau produit ajouté
       console.log("Bien ajouté");
       navigation.navigate("Home");

@@ -10,7 +10,7 @@ export default function HomeScreen({ navigation }) {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://192.168.1.189:5000/products");
+      const response = await axios.get("http://192.168.1.51:5000/products");
       setProducts(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des produits:", error);
@@ -41,7 +41,7 @@ export default function HomeScreen({ navigation }) {
 
   const handleDeleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://192.168.1.189:5000/products/${productId}`);
+      await axios.delete(`http://192.168.1.51:5000/products/${productId}`);
       setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
       setModalVisible(false);
     } catch (error) {
@@ -65,6 +65,7 @@ export default function HomeScreen({ navigation }) {
               <View style={styles.productDetails}>
                 <Text style={styles.productName}>{item.name}</Text>
                 <Text style={styles.productPrice}>Prix : {item.price}</Text>
+                <Text style={styles.productPrice}>Quantité : {item.quantity}</Text>
                 <View style={styles.buttonsContainer}>
                   <Button title="Modifier" onPress={() => handleEditProduct(item)} />
                   <Button title="Supprimer" onPress={() => confirmDelete(item)} />

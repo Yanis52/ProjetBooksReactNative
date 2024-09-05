@@ -8,7 +8,7 @@ export default function EditProductScreen({ navigation, route }) {
   const [image_url, setImage_url] = useState(product.image_url);
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState(product.price);
-  const [quantity, setQuantity] = useState(product.quantity);
+  const [quantity, setQuantity] = useState(product.quantity.toString());
 
   const handleSave = async () => {
     const updatedProduct = {
@@ -21,7 +21,7 @@ export default function EditProductScreen({ navigation, route }) {
     };
 
     try {
-      const response = await axios.put(`http://192.168.1.189:5000/products/${product.id}`, updatedProduct);
+      const response = await axios.put(`http://192.168.1.51:5000/products/${product.id}`, updatedProduct);
       updateProduct(response.data);
       navigation.navigate("Home");
     } catch (error) {
