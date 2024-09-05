@@ -1,38 +1,31 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  FlatList,
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useState, useCallback } from 'react';
+import { Button, FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
 
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null); // Livre à supprimer
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Fonction pour charger les livres depuis l'API
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://192.168.1.51:5000/products");
+      const response = await axios.get("http://192.168.1.189:5000/products");
       setProducts(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des produits:", error);
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, [])
+  );
 
   const handleAddProduct = () => {
     navigation.navigate("AddProduct", {
-      addProduct: (newProduct) => setProducts([...products, newProduct]),
+      addProduct: (newProduct) => setProducts((prevProducts) => [...prevProducts, newProduct]),
     });
   };
 
@@ -40,15 +33,17 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate("EditProduct", {
       product,
       updateProduct: (updatedProduct) =>
-        setProducts(products.map((b) => (b.id === updatedProduct.id ? updatedProduct : b))),
+        setProducts((prevProducts) =>
+          prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+        ),
     });
   };
 
   const handleDeleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://192.168.1.51:5000/products/${productId}`);
-      setProducts(products.filter((product) => product.id !== productId));
-      setModalVisible(false); // Fermer la modale après suppression
+      await axios.delete(`http://192.168.1.189:5000/products/${productId}`);
+      setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
+      setModalVisible(false);
     } catch (error) {
       console.error("Erreur lors de la suppression du produit:", error);
     }
@@ -59,54 +54,37 @@ export default function HomeScreen({ navigation }) {
     setModalVisible(true);
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate("Details", { product: item })}
-    >
-      <View style={styles.productContainer}>
-        <Image source={{ uri: item.image_url }} style={styles.productImage} />
-        <View style={styles.productDetails}>
-          <Text style={styles.productName}>{item.name}</Text>
-          <Text style={styles.productPrice}>Prix : {item.price}</Text>
-          <Text style={styles.productPrice}>Quantité : {item.quantity}</Text>
-          <View style={styles.buttonsContainer}>
-            <Button title="Modifier" onPress={() => handleEditProduct(item)} />
-            <Button title="Supprimer" onPress={() => confirmDelete(item)} />
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
       <FlatList
         data={products}
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => navigation.navigate("Details", { product: item, updateProductList: setProducts })}>
+            <View style={styles.productContainer}>
+              <Image source={{ uri: item.image_url }} style={styles.productImage} />
+              <View style={styles.productDetails}>
+                <Text style={styles.productName}>{item.name}</Text>
+                <Text style={styles.productPrice}>Prix : {item.price}</Text>
+                <View style={styles.buttonsContainer}>
+                  <Button title="Modifier" onPress={() => handleEditProduct(item)} />
+                  <Button title="Supprimer" onPress={() => confirmDelete(item)} />
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
         keyExtractor={(item) => item.id.toString()}
       />
       <Button title="Ajouter un produit" onPress={handleAddProduct} />
 
-      {/* Modal de confirmation */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      <Modal visible={modalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Confirmer la suppression</Text>
-            <Text style={styles.modalText}>
-              Voulez-vous vraiment supprimer le produit "{selectedProduct?.name}" ?
-            </Text>
+            <Text style={styles.modalText}>Voulez-vous vraiment supprimer "{selectedProduct?.name}" ?</Text>
             <View style={styles.modalButtons}>
               <Button title="Annuler" onPress={() => setModalVisible(false)} />
-              <Button
-                title="Supprimer"
-                onPress={() => handleDeleteProduct(selectedProduct.id)}
-                color="red"
-              />
+              <Button title="Supprimer" onPress={() => handleDeleteProduct(selectedProduct.id)} color="red" />
             </View>
           </View>
         </View>
@@ -116,6 +94,7 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

@@ -6,18 +6,18 @@ export default function ProductDetailsScreen({ route, navigation }) {
   const { product, updateProductList } = route.params;
 
   const handleEditProduct = () => {
-    navigation.navigate('EditProduct', { product });
+    navigation.navigate('EditProduct', {
+      product,
+      updateProduct: (updatedProduct) => updateProductList((prevProducts) =>
+        prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+      ),
+    });
   };
 
   const handleDeleteProduct = async () => {
     try {
-      // Envoi de la requête DELETE à l'API Flask
-      await axios.delete(`http://192.168.1.51:5000/products/${product.id}`);
-      
-      // Mise à jour de la liste des livres
-      updateProductList(product.id);
-
-      // Retour à l'écran d'accueil après suppression
+      await axios.delete(`http://192.168.1.189:5000/products/${product.id}`);
+      updateProductList((prevProducts) => prevProducts.filter((p) => p.id !== product.id));
       navigation.navigate('Home');
     } catch (error) {
       Alert.alert("Erreur", "La suppression du produit a échoué.");
@@ -31,7 +31,6 @@ export default function ProductDetailsScreen({ route, navigation }) {
       <Text style={styles.productNom}>{product.name}</Text>
       <Text style={styles.productDescription}>{product.description}</Text>
       <Text style={styles.productPrice}>Prix : {product.price}</Text>
-      <Text style={styles.productQuantity}>Quantité : {product.quantity}</Text>
       <View style={styles.buttonsContainer}>
         <Button title="Modifier" onPress={handleEditProduct} />
         <Button title="Supprimer" onPress={handleDeleteProduct} />
