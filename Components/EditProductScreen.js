@@ -2,46 +2,50 @@ import React, { useState } from "react";
 import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 import axios from 'axios';
 
-export default function EditBookScreen({ navigation, route }) {
-  const { book, updateBook } = route.params;
-  const [title, setTitle] = useState(book.title);
-  const [author, setAuthor] = useState(book.author);
-  const [year, setYear] = useState(book.year);
-  const [description, setDescription] = useState(book.description);
-  const [coverImage, setCoverImage] = useState(book.coverImage);
+export default function EditProductScreen({ navigation, route }) {
+  const { product, updateProduct } = route.params;
+  const [description, setDescription] = useState(product.description);
+  const [image_url, setImage_url] = useState(product.image_url);
+  const [name, setName] = useState(product.name);
+  const [price, setPrice] = useState(product.price);
+  const [quantity, setQuantity] = useState(product.quantity);
 
   const handleSave = async () => {
-    const updatedBook = {
-      ...book,
-      title,
-      author,
-      year,
+    const updatedProduct = {
+      ...product,
       description,
-      coverImage,
+      image_url,
+      name,
+      price,
+      quantity,
     };
 
     try {
-      const response = await axios.put(`http://192.168.1.189:5000/books/${book.id}`, updatedBook);
-      updateBook(response.data); // Mettre à jour l'état avec le livre modifié
+      const response = await axios.put(`http://192.168.1.51:5000/products/${product.id}`, updatedProduct);
+      updateProduct(response.data);
       navigation.navigate("Home");
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du livre:", error);
+      console.error("Erreur lors de la mise à jour du produit:", error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Titre</Text>
-      <TextInput style={styles.input} value={title} onChangeText={setTitle} />
+      <Text style={styles.label}>Nom</Text>
+      <TextInput style={styles.input} value={name} onChangeText={setName} />
 
-      <Text style={styles.label}>Auteur</Text>
-      <TextInput style={styles.input} value={author} onChangeText={setAuthor} />
-
-      <Text style={styles.label}>Année de Publication</Text>
+      <Text style={styles.label}>Prix</Text>
       <TextInput
         style={styles.input}
-        value={year}
-        onChangeText={setYear}
+        value={price}
+        onChangeText={setPrice}
+        keyboardType="numeric"
+      />
+      <Text style={styles.label}>Quantité</Text>
+      <TextInput
+        style={styles.input}
+        value={quantity}
+        onChangeText={setQuantity}
         keyboardType="numeric"
       />
 
@@ -55,8 +59,8 @@ export default function EditBookScreen({ navigation, route }) {
       <Text style={styles.label}>URL de l'Image de Couverture</Text>
       <TextInput
         style={styles.input}
-        value={coverImage}
-        onChangeText={setCoverImage}
+        value={image_url}
+        onChangeText={setImage_url}
       />
 
       <Button title="Enregistrer" onPress={handleSave} />

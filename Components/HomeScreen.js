@@ -12,64 +12,65 @@ import {
 } from "react-native";
 
 export default function HomeScreen({ navigation }) {
-  const [books, setBooks] = useState([]);
+  const [products, setProducts] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null); // Livre à supprimer
+  const [selectedProduct, setSelectedProduct] = useState(null); // Livre à supprimer
 
   // Fonction pour charger les livres depuis l'API
-  const fetchBooks = async () => {
+  const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://192.168.1.189:5000/books");
-      setBooks(response.data);
+      const response = await axios.get("http://192.168.1.51:5000/products");
+      setProducts(response.data);
     } catch (error) {
-      console.error("Erreur lors du chargement des livres:", error);
+      console.error("Erreur lors du chargement des produits:", error);
     }
   };
 
   useEffect(() => {
-    fetchBooks();
+    fetchProducts();
   }, []);
 
-  const handleAddBook = () => {
-    navigation.navigate("AddBook", {
-      addBook: (newBook) => setBooks([...books, newBook]),
+  const handleAddProduct = () => {
+    navigation.navigate("AddProduct", {
+      addProduct: (newProduct) => setProducts([...products, newProduct]),
     });
   };
 
-  const handleEditBook = (book) => {
-    navigation.navigate("EditBook", {
-      book,
-      updateBook: (updatedBook) =>
-        setBooks(books.map((b) => (b.id === updatedBook.id ? updatedBook : b))),
+  const handleEditProduct = (product) => {
+    navigation.navigate("EditProduct", {
+      product,
+      updateProduct: (updatedProduct) =>
+        setProducts(products.map((b) => (b.id === updatedProduct.id ? updatedProduct : b))),
     });
   };
 
-  const handleDeleteBook = async (bookId) => {
+  const handleDeleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://192.168.1.189:5000/books/${bookId}`);
-      setBooks(books.filter((book) => book.id !== bookId));
+      await axios.delete(`http://192.168.1.51:5000/products/${productId}`);
+      setProducts(products.filter((product) => product.id !== productId));
       setModalVisible(false); // Fermer la modale après suppression
     } catch (error) {
-      console.error("Erreur lors de la suppression du livre:", error);
+      console.error("Erreur lors de la suppression du produit:", error);
     }
   };
 
-  const confirmDelete = (book) => {
-    setSelectedBook(book);
+  const confirmDelete = (product) => {
+    setSelectedProduct(product);
     setModalVisible(true);
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate("Details", { book: item })}
+      onPress={() => navigation.navigate("Details", { product: item })}
     >
-      <View style={styles.bookContainer}>
-        <Image source={{ uri: item.coverImage }} style={styles.bookImage} />
-        <View style={styles.bookDetails}>
-          <Text style={styles.bookTitle}>{item.title}</Text>
-          <Text style={styles.bookAuthor}>{item.author}</Text>
+      <View style={styles.productContainer}>
+        <Image source={{ uri: item.image_url }} style={styles.productImage} />
+        <View style={styles.productDetails}>
+          <Text style={styles.productName}>{item.name}</Text>
+          <Text style={styles.productPrice}>Prix : {item.price}</Text>
+          <Text style={styles.productPrice}>Quantité : {item.quantity}</Text>
           <View style={styles.buttonsContainer}>
-            <Button title="Modifier" onPress={() => handleEditBook(item)} />
+            <Button title="Modifier" onPress={() => handleEditProduct(item)} />
             <Button title="Supprimer" onPress={() => confirmDelete(item)} />
           </View>
         </View>
@@ -80,11 +81,11 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={books}
+        data={products}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
       />
-      <Button title="Ajouter un Livre" onPress={handleAddBook} />
+      <Button title="Ajouter un produit" onPress={handleAddProduct} />
 
       {/* Modal de confirmation */}
       <Modal
@@ -97,13 +98,13 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Confirmer la suppression</Text>
             <Text style={styles.modalText}>
-              Voulez-vous vraiment supprimer le livre "{selectedBook?.title}" ?
+              Voulez-vous vraiment supprimer le produit "{selectedProduct?.name}" ?
             </Text>
             <View style={styles.modalButtons}>
               <Button title="Annuler" onPress={() => setModalVisible(false)} />
               <Button
                 title="Supprimer"
-                onPress={() => handleDeleteBook(selectedBook.id)}
+                onPress={() => handleDeleteProduct(selectedProduct.id)}
                 color="red"
               />
             </View>
@@ -122,27 +123,27 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#fff",
   },
-  bookContainer: {
+  productContainer: {
     flexDirection: "row",
     marginBottom: 10,
     padding: 10,
     borderWidth: 1,
     borderRadius: 5,
   },
-  bookImage: {
+  productImage: {
     width: 100,
     height: 100,
   },
-  bookDetails: {
+  productDetails: {
     flex: 1,
     marginLeft: 10,
     justifyContent: "center",
   },
-  bookTitle: {
+  productName: {
     fontSize: 18,
     fontWeight: "bold",
   },
-  bookAuthor: {
+  productPrice: {
     fontSize: 16,
     color: "#888",
   },

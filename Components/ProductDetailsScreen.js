@@ -2,39 +2,39 @@ import React from 'react';
 import { View, Text, Image, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 
-export default function BookDetailsScreen({ route, navigation }) {
-  const { book, updateBookList } = route.params;
+export default function ProductDetailsScreen({ route, navigation }) {
+  const { product, updateProductList } = route.params;
 
-  const handleEditBook = () => {
-    navigation.navigate('EditBook', { book });
+  const handleEditProduct = () => {
+    navigation.navigate('EditProduct', { product });
   };
 
-  const handleDeleteBook = async () => {
+  const handleDeleteProduct = async () => {
     try {
       // Envoi de la requête DELETE à l'API Flask
-      await axios.delete(`http://192.168.1.189:5000/books/${book.id}`);
+      await axios.delete(`http://192.168.1.51:5000/products/${product.id}`);
       
       // Mise à jour de la liste des livres
-      updateBookList(book.id);
+      updateProductList(product.id);
 
       // Retour à l'écran d'accueil après suppression
       navigation.navigate('Home');
     } catch (error) {
-      Alert.alert("Erreur", "La suppression du livre a échoué.");
-      console.error("Erreur lors de la suppression du livre:", error);
+      Alert.alert("Erreur", "La suppression du produit a échoué.");
+      console.error("Erreur lors de la suppression du produit:", error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: book.coverImage }} style={styles.bookImage} />
-      <Text style={styles.bookTitle}>{book.title}</Text>
-      <Text style={styles.bookAuthor}>Auteur: {book.author}</Text>
-      <Text style={styles.bookYear}>Année de publication: {book.year}</Text>
-      <Text style={styles.bookDescription}>{book.description}</Text>
+      <Image source={{ uri: product.image_url }} style={styles.productImage} />
+      <Text style={styles.productNom}>{product.name}</Text>
+      <Text style={styles.productDescription}>{product.description}</Text>
+      <Text style={styles.productPrice}>Prix : {product.price}</Text>
+      <Text style={styles.productQuantity}>Quantité : {product.quantity}</Text>
       <View style={styles.buttonsContainer}>
-        <Button title="Modifier" onPress={handleEditBook} />
-        <Button title="Supprimer" onPress={handleDeleteBook} />
+        <Button title="Modifier" onPress={handleEditProduct} />
+        <Button title="Supprimer" onPress={handleDeleteProduct} />
       </View>
       <Button title="Retour à l'Accueil" onPress={() => navigation.navigate('Home')} />
       <Text style={styles.footerText}>Développé par Yanis Habarek</Text>
@@ -48,25 +48,25 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#fff',
   },
-  bookImage: {
+  productImage: {
     width: '100%',
     height: 200,
     marginBottom: 20,
   },
-  bookTitle: {
+  productNom: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  bookAuthor: {
+  productPrice: {
     fontSize: 18,
     marginBottom: 10,
   },
-  bookYear: {
+  productQuantity: {
     fontSize: 16,
     marginBottom: 10,
   },
-  bookDescription: {
+  productDescription: {
     fontSize: 16,
     marginBottom: 20,
   },

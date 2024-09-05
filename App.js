@@ -1,9 +1,9 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as React from "react";
-import AddBookScreen from "./Components/AddBookScreen";
-import BookDetailsScreen from "./Components/BookDetailsScreen";
-import EditBookScreen from "./Components/EditBookScreen";
+import AddProductScreen from "./Components/AddProductScreen";
+import ProductDetailsScreen from "./Components/ProductDetailsScreen";
+import EditProductScreen from "./Components/EditProductScreen";
 import HomeScreen from "./Components/HomeScreen";
 
 const Stack = createStackNavigator();
@@ -19,11 +19,19 @@ export default function App() {
         />
         <Stack.Screen
           name="Details"
-          component={BookDetailsScreen}
-          options={{ title: "Détails du Livre" }}
+          component={ProductDetailsScreen}
+          options={{ title: "Détails du produit" }}
         />
-        <Stack.Screen name="AddBook" component={AddBookScreen} />
-        <Stack.Screen name="EditBook" component={EditBookScreen} />
+        <Stack.Screen 
+          name="AddProduct" 
+          component={AddProductScreen}
+          options={{ title: "Ajout d'un produit" }}
+        />
+        <Stack.Screen 
+          name="EditProduct" 
+          component={EditProductScreen}
+          options={{ title: "Modification du produit" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
