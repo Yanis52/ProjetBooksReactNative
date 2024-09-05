@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { Button, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import axios from 'axios';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function HomeScreen({ navigation }) {
   const [books, setBooks] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null); // Livre à supprimer
 
   // Fonction pour charger les livres depuis l'API
   const fetchBooks = async () => {
     try {
-      const response = await axios.get('http://192.168.1.189:5000/books');
+      const response = await axios.get("http://192.168.1.189:5000/books");
       setBooks(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des livres:", error);
@@ -37,9 +48,15 @@ export default function HomeScreen({ navigation }) {
     try {
       await axios.delete(`http://192.168.1.189:5000/books/${bookId}`);
       setBooks(books.filter((book) => book.id !== bookId));
+      setModalVisible(false); // Fermer la modale après suppression
     } catch (error) {
       console.error("Erreur lors de la suppression du livre:", error);
     }
+  };
+
+  const confirmDelete = (book) => {
+    setSelectedBook(book);
+    setModalVisible(true);
   };
 
   const renderItem = ({ item }) => (
@@ -53,10 +70,7 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.bookAuthor}>{item.author}</Text>
           <View style={styles.buttonsContainer}>
             <Button title="Modifier" onPress={() => handleEditBook(item)} />
-            <Button
-              title="Supprimer"
-              onPress={() => handleDeleteBook(item.id)}
-            />
+            <Button title="Supprimer" onPress={() => confirmDelete(item)} />
           </View>
         </View>
       </View>
@@ -71,6 +85,32 @@ export default function HomeScreen({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
       />
       <Button title="Ajouter un Livre" onPress={handleAddBook} />
+
+      {/* Modal de confirmation */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Confirmer la suppression</Text>
+            <Text style={styles.modalText}>
+              Voulez-vous vraiment supprimer le livre "{selectedBook?.title}" ?
+            </Text>
+            <View style={styles.modalButtons}>
+              <Button title="Annuler" onPress={() => setModalVisible(false)} />
+              <Button
+                title="Supprimer"
+                onPress={() => handleDeleteBook(selectedBook.id)}
+                color="red"
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <Text style={styles.footerText}>Développé par Yanis Habarek</Text>
     </View>
   );
@@ -116,5 +156,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 12,
     color: "#aaa",
+  },
+  // Styles pour la modale
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
 });
