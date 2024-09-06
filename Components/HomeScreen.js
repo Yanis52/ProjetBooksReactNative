@@ -1,13 +1,25 @@
-import React, { useState, useCallback } from 'react';
-import { Button, FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import axios from 'axios';
+import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
+import React, { useCallback, useState } from "react";
+import {
+  Button,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function HomeScreen({ navigation }) {
   const [products, setProducts] = useState([]);
+  const [searchText, setSearchText] = useState(""); // Texte de recherche
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  // Fonction pour charger les produits depuis l'API
   const fetchProducts = async () => {
     try {
       const response = await axios.get("http://192.168.1.51:5000/products");
@@ -17,15 +29,22 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  // Charger les produits à chaque retour sur cet écran
   useFocusEffect(
     useCallback(() => {
       fetchProducts();
     }, [])
   );
 
+  // Filtrer les produits selon le texte de recherche
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   const handleAddProduct = () => {
     navigation.navigate("AddProduct", {
-      addProduct: (newProduct) => setProducts((prevProducts) => [...prevProducts, newProduct]),
+      addProduct: (newProduct) =>
+        setProducts((prevProducts) => [...prevProducts, newProduct]),
     });
   };
 
@@ -34,7 +53,9 @@ export default function HomeScreen({ navigation }) {
       product,
       updateProduct: (updatedProduct) =>
         setProducts((prevProducts) =>
-          prevProducts.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+          prevProducts.map((p) =>
+            p.id === updatedProduct.id ? updatedProduct : p
+          )
         ),
     });
   };
@@ -42,7 +63,9 @@ export default function HomeScreen({ navigation }) {
   const handleDeleteProduct = async (productId) => {
     try {
       await axios.delete(`http://192.168.1.51:5000/products/${productId}`);
-      setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== productId)
+      );
       setModalVisible(false);
     } catch (error) {
       console.error("Erreur lors de la suppression du produit:", error);
@@ -56,36 +79,74 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Barre de recherche */}
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Rechercher un produit"
+        value={searchText}
+        onChangeText={(text) => setSearchText(text)}
+      />
+
       <FlatList
-        data={products}
+        data={filteredProducts} // Utiliser les produits filtrés
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate("Details", { product: item, updateProductList: setProducts })}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("Details", {
+                product: item,
+                updateProductList: setProducts,
+              })
+            }
+          >
             <View style={styles.productContainer}>
-              <Image source={{ uri: item.image_url }} style={styles.productImage} />
+              <Image
+                source={{ uri: item.image_url }}
+                style={styles.productImage}
+              />
               <View style={styles.productDetails}>
                 <Text style={styles.productName}>{item.name}</Text>
                 <Text style={styles.productPrice}>Prix : {item.price}</Text>
-                <Text style={styles.productPrice}>Quantité : {item.quantity}</Text>
+                <Text style={styles.productPrice}>
+                  Quantité : {item.quantity}
+                </Text>
                 <View style={styles.buttonsContainer}>
-                  <Button title="Modifier" onPress={() => handleEditProduct(item)} />
-                  <Button title="Supprimer" onPress={() => confirmDelete(item)} />
+                  <Button
+                    title="Modifier"
+                    onPress={() => handleEditProduct(item)}
+                  />
+                  <Button
+                    title="Supprimer"
+                    onPress={() => confirmDelete(item)}
+                  />
                 </View>
               </View>
             </View>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={<Text>Aucun produit trouvé.</Text>} // Message si aucun produit ne correspond
       />
+
       <Button title="Ajouter un produit" onPress={handleAddProduct} />
 
-      <Modal visible={modalVisible} transparent={true} onRequestClose={() => setModalVisible(false)}>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Confirmer la suppression</Text>
-            <Text style={styles.modalText}>Voulez-vous vraiment supprimer "{selectedProduct?.name}" ?</Text>
+            <Text style={styles.modalText}>
+              Voulez-vous vraiment supprimer "{selectedProduct?.name}" ?
+            </Text>
             <View style={styles.modalButtons}>
               <Button title="Annuler" onPress={() => setModalVisible(false)} />
-              <Button title="Supprimer" onPress={() => handleDeleteProduct(selectedProduct.id)} color="red" />
+              <Button
+                title="Supprimer"
+                onPress={() => handleDeleteProduct(selectedProduct.id)}
+                color="red"
+              />
             </View>
           </View>
         </View>
@@ -96,12 +157,19 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
     backgroundColor: "#fff",
+  },
+  searchBar: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    paddingLeft: 10,
+    borderRadius: 5,
+    marginBottom: 20,
   },
   productContainer: {
     flexDirection: "row",
